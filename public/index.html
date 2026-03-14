@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,94 +27,101 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+
         * {
             font-family: 'Inter', sans-serif;
         }
-        
+
         .gradient-bg {
             background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
         }
-        
+
         .gradient-text {
             background: linear-gradient(135deg, #7c3aed, #4f46e5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .card-hover {
             transition: all 0.3s ease;
             border: 1px solid #e5e7eb;
         }
-        
+
         .card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px -10px rgba(124, 58, 237, 0.15);
             border-color: #7c3aed;
         }
-        
+
         .glass-effect {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         /* Animation for stats */
         @keyframes countUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .count-animation {
             animation: countUp 0.6s ease-out;
         }
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
             border-radius: 10px;
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: #c7d2fe;
             border-radius: 10px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
             background: #7c3aed;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .hero-content {
                 padding-top: 40px;
                 padding-bottom: 40px;
             }
-            
+
             .hero-title {
                 font-size: 2.5rem;
             }
-            
+
             .feature-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
+
             .how-it-works {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         @media (min-width: 769px) and (max-width: 1024px) {
             .feature-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (min-width: 1025px) {
             .feature-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -121,6 +129,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50 min-h-screen">
     <!-- Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-40">
@@ -128,9 +137,12 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                </path>
                             </svg>
                         </div>
                         <h1 class="text-xl font-bold gradient-text">VAUTH</h1>
@@ -161,14 +173,16 @@
                     Secure Authentication with VAUTH
                 </h1>
                 <p class="text-xl mb-8 max-w-3xl mx-auto">
-                    Advanced two-factor authentication system with real-time monitoring, 
+                    Advanced two-factor authentication system with real-time monitoring,
                     encrypted data storage, and comprehensive admin controls.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="/login" class="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition duration-300 shadow-lg">
+                    <a href="/login"
+                        class="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition duration-300 shadow-lg">
                         Get Started
                     </a>
-                    <a href="#features" class="glass-effect text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition duration-300">
+                    <a href="#features"
+                        class="glass-effect text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition duration-300">
                         Learn More
                     </a>
                 </div>
@@ -217,7 +231,9 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
@@ -230,12 +246,14 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-accent rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Encrypted Data Storage</h3>
                     <p class="text-gray-600">
-                        All personal information encrypted with AES-256-GCM encryption for maximum security.
+                        All personal information encrypted with AES-256-CBC encryption for maximum security.
                     </p>
                 </div>
 
@@ -243,7 +261,8 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Real-time Monitoring</h3>
@@ -256,7 +275,9 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-success rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Admin Dashboard</h3>
@@ -269,7 +290,8 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Session Management</h3>
@@ -282,7 +304,9 @@
                 <div class="card-hover bg-gray-50 p-8 rounded-2xl">
                     <div class="w-12 h-12 bg-error rounded-xl flex items-center justify-center mb-6">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
+                            </path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Security Alerts</h3>
@@ -308,7 +332,8 @@
 
             <div class="how-it-works grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                         <span class="text-2xl font-bold text-white">1</span>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Login with Credentials</h3>
@@ -318,7 +343,8 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-accent to-warning rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-r from-accent to-warning rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                         <span class="text-2xl font-bold text-white">2</span>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Verify with VAUTH Token</h3>
@@ -328,7 +354,8 @@
                 </div>
 
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-secondary to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <div
+                        class="w-20 h-20 bg-gradient-to-r from-secondary to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                         <span class="text-2xl font-bold text-white">3</span>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-4">Access Dashboard</h3>
@@ -348,10 +375,12 @@
                 Join thousands of organizations using VAUTH for secure, reliable authentication.
             </p>
             <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="/login" class="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition duration-300 shadow-lg">
+                <a href="/login"
+                    class="bg-white text-primary px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition duration-300 shadow-lg">
                     Get Started Now
                 </a>
-                <a href="/admin/login" class="glass-effect text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition duration-300">
+                <a href="/admin/login"
+                    class="glass-effect text-white px-8 py-3 rounded-xl font-semibold hover:bg-white hover:bg-opacity-20 transition duration-300">
                     Admin Access
                 </a>
             </div>
@@ -363,9 +392,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <div class="flex items-center justify-center mb-4">
-                    <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
+                    <div
+                        class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
                         </svg>
                     </div>
                     <h3 class="text-2xl font-bold">VAUTH</h3>
@@ -375,12 +407,15 @@
                 </p>
                 <div class="flex justify-center space-x-6 mb-8">
                     <a href="/login" class="text-gray-400 hover:text-white transition duration-300">User Login</a>
-                    <a href="/admin/login" class="text-gray-400 hover:text-white transition duration-300">Admin Login</a>
+                    <a href="/admin/login" class="text-gray-400 hover:text-white transition duration-300">Admin
+                        Login</a>
                     <a href="#features" class="text-gray-400 hover:text-white transition duration-300">Features</a>
                 </div>
                 <div class="mt-8 pt-8 border-t border-gray-700">
                     <p class="text-gray-400 text-sm">
-                        © 2024 VAUTH. All rights reserved. Built with security-first principles.
+                        ©
+                        <script>document.write(new Date().getFullYear())</script> VAUTH. All rights reserved. Built with
+                        security-first principles.
                     </p>
                 </div>
             </div>
@@ -435,4 +470,5 @@
         document.head.appendChild(style);
     </script>
 </body>
+
 </html>

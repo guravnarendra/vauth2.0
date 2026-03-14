@@ -23,6 +23,7 @@ const { cleanupExpiredData } = require('./middleware/cleanup');
 
 // Import Firebase token manager
 const firebaseTokenManager = require('./utils/firebaseTokenManager');
+const BlockedIP = require('./models/BlockedIP');
 
 // Initialize Express app
 const app = express();
@@ -67,21 +68,45 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiters
+// Rate limiters (with IP tracking for admin dashboard)
 const loginLimiter = rateLimit({
   windowMs: parseInt(process.env.LOGIN_RATE_LIMIT_WINDOW_MS) || 900000, // 15 min
   max: parseInt(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS) || 5,
-  message: 'Too many login attempts, please try again later.',
+  message: { success: false, message: 'Too many login attempts, your IP has been blocked. Contact admin.' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: async (req, res, next, options) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    const username = req.body.username || 'Unknown';
+    try {
+      await BlockedIP.blockIP(clientIP, username, options.max, 'Rate limit exceeded: too many login attempts');
+      console.log(`🚫 IP ${clientIP} blocked due to rate limiting (user: ${username})`);
+      const io = req.app.get('io');
+      if (io) {
+        io.to('admin').emit('ip-blocked', { ip: clientIP, username, reason: 'Rate limit exceeded' });
+      }
+    } catch (e) { console.error('Failed to save blocked IP:', e); }
+    res.status(options.statusCode).json(options.message);
+  }
 });
 
 const tokenLimiter = rateLimit({
   windowMs: parseInt(process.env.TOKEN_RATE_LIMIT_WINDOW_MS) || 300000, // 5 min
   max: parseInt(process.env.TOKEN_RATE_LIMIT_MAX_ATTEMPTS) || 10,
-  message: 'Too many token verification attempts, please try again later.',
+  message: { success: false, message: 'Too many token verification attempts, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  handler: async (req, res, next, options) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    try {
+      await BlockedIP.blockIP(clientIP, 'Unknown', options.max, 'Rate limit exceeded: too many token attempts');
+      const io = req.app.get('io');
+      if (io) {
+        io.to('admin').emit('ip-blocked', { ip: clientIP, reason: 'Token rate limit exceeded' });
+      }
+    } catch (e) { console.error('Failed to save blocked IP:', e); }
+    res.status(options.statusCode).json(options.message);
+  }
 });
 
 // Body parsers
@@ -132,38 +157,57 @@ app.use('/api/admin/login', loginLimiter);
 // API Routes
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api', ipIntelRoutes);
+app.use('/', ipIntelRoutes);
 
 // Main Frontend Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// User Routes
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'user', 'login.html'));
 });
 
 app.get('/2fa', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', '2fa.html'));
+  res.sendFile(path.join(__dirname, 'public', 'user', '2fa.html'));
 });
 
 app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'user', 'dashboard.html'));
 });
 
+// Admin page auth middleware (redirects to login page)
+function requireAdminPage(req, res, next) {
+  if (!req.session.isAdmin) {
+    return res.redirect('/admin/login');
+  }
+  next();
+}
+
+// Admin Routes
 app.get('/admin/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'admin', 'login.html'));
 });
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
+// Protected admin pages
+const adminPages = ['dashboard', 'add-user', 'users', 'tokens', 'sessions', 'virtual-device', 'block-device', 'rate-limiting', 'pc-agent-health'];
+app.get('/admin', requireAdminPage, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html'));
+});
+adminPages.forEach(page => {
+  if (page !== 'dashboard') {
+    app.get(`/admin/${page}`, requireAdminPage, (req, res) => {
+      res.sendFile(path.join(__dirname, 'public', 'admin', `${page}.html`));
+    });
+  }
 });
 
 // Health check endpoint
 app.get('/health', async (req, res) => {
   const mongoose = require('mongoose');
   const { db: firebaseDb } = require('./config/firebase');
-  
+
   let mongodbStatus = 'disconnected';
   try {
     if (mongoose.connection.readyState === 1) mongodbStatus = 'connected';
@@ -198,7 +242,7 @@ io.on('connection', (socket) => {
   socket.on('join-admin', () => {
     socket.join('admin');
     console.log('Admin joined real-time monitoring:', socket.id);
-    
+
     // Send welcome message with current system status
     socket.emit('admin-welcome', {
       message: 'Welcome to VAUTH Admin Dashboard',
@@ -237,7 +281,7 @@ io.on('connection', (socket) => {
   // Disconnects
   socket.on('disconnect', (reason) => {
     console.log('Client disconnected:', socket.id, 'Reason:', reason);
-    
+
     // Emit admin left event if they were in admin room
     if (socket.rooms.has('admin')) {
       socket.to('admin').emit('admin-left', {
@@ -272,7 +316,7 @@ setInterval(() => {
     memoryUsage: process.memoryUsage(),
     uptime: process.uptime()
   };
-  
+
   // Emit system status to admin room
   io.to('admin').emit('system-status', systemStatus);
 }, 30000); // Every 30 seconds
@@ -298,14 +342,14 @@ app.use((req, res) => {
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
   console.log('\n🔴 Received SIGINT. Shutting down gracefully...');
-  
+
   const mongoose = require('mongoose');
-  
+
   // Close socket.io connections
   io.close(() => {
     console.log('✅ Socket.IO server closed');
   });
-  
+
   // Close MongoDB connection
   try {
     await mongoose.connection.close();
@@ -313,13 +357,13 @@ process.on('SIGINT', async () => {
   } catch (err) {
     console.error('Error closing MongoDB:', err);
   }
-  
+
   // Close HTTP server
   server.close(() => {
     console.log('✅ HTTP server closed');
     process.exit(0);
   });
-  
+
   // Force close after 10 seconds
   setTimeout(() => {
     console.log('⚠️  Forcing shutdown after timeout');
@@ -329,16 +373,16 @@ process.on('SIGINT', async () => {
 
 process.on('SIGTERM', () => {
   console.log('\n🔴 Received SIGTERM. Shutting down gracefully...');
-  
+
   io.close(() => {
     console.log('✅ Socket.IO server closed');
   });
-  
+
   server.close(() => {
     console.log('✅ HTTP server closed');
     process.exit(0);
   });
-  
+
   setTimeout(() => {
     console.log('⚠️  Forcing shutdown after timeout');
     process.exit(1);

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAUTH Admin - Pc-agent Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7C3AED',
+                        secondary: '#4F46E5',
+                        accent: '#F59E0B',
+                        dark: '#1F2937',
+                        light: '#F9FAFB',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        error: '#EF4444',
+                        info: '#3B82F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/css/admin-common.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold gradient-text">VAUTH Admin</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span>System Online</span>
+                    </div>
+                    <div class="text-sm text-gray-600 hidden md:block">
+                        Welcome, <span class="font-semibold text-gray-900">Admin</span>
+                    </div>
+                    <button id="logoutButton" class="btn-primary">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex max-w-7xl mx-auto">
+        <!-- Desktop Sidebar -->
+        <div class="desktop-sidebar w-64 bg-white min-h-screen border-r border-gray-100 py-6">
+            <div class="px-6">
+                <nav class="space-y-2">
+                    <a href="/admin" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="/admin/add-user" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Add New User
+                    </a>
+                    <a href="/admin/users" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        User Database
+                    </a>
+                    <a href="/admin/tokens" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                        </svg>
+                        Token Database
+                    </a>
+                    <a href="/admin/sessions" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Session Monitor
+                    </a>
+                    <a href="/admin/virtual-device" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Virtual Device
+                    </a>
+                    <a href="/admin/block-device" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        Block Device
+                    </a>
+                    <a href="/admin/rate-limiting" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        Rate Limiting
+                    </a>
+                    <a href="/admin/pc-agent-health" class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="flex items-center">
+                            Pc-agent Health
+                            <div class="w-2 h-2 bg-success rounded-full ml-2" id="pcAgentStatusDot"></div>
+                        </span>
+                    </a>
+                </nav>
+
+                <!-- System Status -->
+                <div class="mt-8 p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white">
+                    <h3 class="font-semibold text-sm mb-2">System Status</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between"><span>API Server</span><span class="font-semibold">Online</span></div>
+                        <div class="flex justify-between"><span>Database</span><span class="font-semibold">Healthy</span></div>
+                        <div class="flex justify-between"><span>Last Backup</span><span class="font-semibold">2h ago</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 p-4 md:p-6 lg:p-8">
+            
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Pc-agent Health Dashboard</h2>
+                            <p class="text-gray-600 mt-2">Real-time system health for hardware device integration.</p>
+                        </div>
+                        <div class="btn-group mt-4 md:mt-0">
+                            <button id="refreshPcAgentHealth" class="btn-primary">
+                                Refresh Status
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Copyable API Link -->
+                    <div
+                        class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-purple-500 mr-2 flex-shrink-0" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                    </path>
+                                </svg>
+                                <span class="text-sm font-semibold text-purple-700">IP Intel API Endpoint:</span>
+                            </div>
+                            <div
+                                class="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-purple-200 flex-1 min-w-0 ml-2">
+                                <code id="pcAgentApiLink"
+                                    class="text-xs text-gray-700 font-mono truncate flex-1">Loading...</code>
+                                <button id="copyApiLink"
+                                    class="text-purple-600 hover:text-purple-800 flex-shrink-0 transition-colors"
+                                    title="Copy API Link">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-purple-600 mt-2">Use this endpoint in your V-Gate hardware device to check IP intelligence (VPN/Proxy/Hosting detection).</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="card-hover bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600 mb-1">Service Status</p>
+                                    <p id="pcAgentStatusText"
+                                        class="text-2xl md:text-3xl font-bold text-green-600 count-animation">Loading...
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-green-50">
+                                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <span>Last checked: <span id="pcAgentLastCheck" class="font-semibold">--</span></span>
+                            </div>
+                        </div>
+
+                        <div class="card-hover bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600 mb-1">System Uptime</p>
+                                    <p id="pcAgentUptime"
+                                        class="text-2xl md:text-3xl font-bold text-primary count-animation">--</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-blue-50">
+                                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <span>OS uptime</span>
+                            </div>
+                        </div>
+
+                        <div class="card-hover bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600 mb-1">CPU Usage</p>
+                                    <p id="pcAgentCpuUsage"
+                                        class="text-2xl md:text-3xl font-bold text-purple-600 count-animation">--%</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-purple-50">
+                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <span id="pcAgentCpuCores">-- cores</span>
+                            </div>
+                        </div>
+
+                        <div class="card-hover bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600 mb-1">Memory Usage</p>
+                                    <p id="pcAgentMemUsage"
+                                        class="text-2xl md:text-3xl font-bold text-orange-600 count-animation">--%</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-orange-50">
+                                    <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-sm text-gray-500">
+                                <span id="pcAgentMemDetail">-- / --</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Health Details -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Service Health Details -->
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Service Health Details</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center">
+                                        <div id="healthDotCore" class="w-3 h-3 bg-gray-300 rounded-full mr-3"></div>
+                                        <span class="font-medium text-gray-700">Core Service</span>
+                                    </div>
+                                    <span id="healthTextCore" class="text-sm font-semibold text-gray-400">Loading</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center">
+                                        <div id="healthDotDb" class="w-3 h-3 bg-gray-300 rounded-full mr-3"></div>
+                                        <span class="font-medium text-gray-700">Database Connection</span>
+                                    </div>
+                                    <span id="healthTextDb" class="text-sm font-semibold text-gray-400">Loading</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center">
+                                        <div id="healthDotDbTime" class="w-3 h-3 bg-gray-300 rounded-full mr-3"></div>
+                                        <span class="font-medium text-gray-700">DB Response Time</span>
+                                    </div>
+                                    <span id="healthTextDbTime" class="text-sm font-semibold text-gray-400">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center">
+                                        <div id="healthDotMem" class="w-3 h-3 bg-gray-300 rounded-full mr-3"></div>
+                                        <span class="font-medium text-gray-700">Memory Usage</span>
+                                    </div>
+                                    <span id="healthTextMem" class="text-sm font-semibold text-gray-400">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <div class="flex items-center">
+                                        <div id="healthDotCpu" class="w-3 h-3 bg-gray-300 rounded-full mr-3"></div>
+                                        <span class="font-medium text-gray-700">CPU Load</span>
+                                    </div>
+                                    <span id="healthTextCpu" class="text-sm font-semibold text-gray-400">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Info -->
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">System Information</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Platform</span>
+                                    <span id="sysInfoPlatform" class="text-sm font-semibold text-gray-600">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Architecture</span>
+                                    <span id="sysInfoArch" class="text-sm font-semibold text-gray-600">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Hostname</span>
+                                    <span id="sysInfoHostname" class="text-sm font-semibold text-gray-600">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Node Version</span>
+                                    <span id="sysInfoNode" class="text-sm font-semibold text-gray-600">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Active Sessions</span>
+                                    <span id="sysInfoSessions" class="text-sm font-semibold text-primary">--</span>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                                    <span class="font-medium text-gray-700">Total Users</span>
+                                    <span id="sysInfoUsers" class="text-sm font-semibold text-primary">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <a href="/admin" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            Dashboard
+        </a>
+        <a href="/admin/add-user" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Add
+        </a>
+        <a href="/admin/users" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            User
+        </a>
+        <a href="/admin/tokens" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
+            Token
+        </a>
+        <a href="/admin/sessions" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Session
+        </a>
+        <a href="/admin/virtual-device" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Virtual
+        </a>
+        <a href="/admin/block-device" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+            </svg>
+            Block
+        </a>
+        <a href="/admin/rate-limiting" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            Rate
+        </a>
+        <a href="/admin/pc-agent-health" class="mobile-nav-item active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Pc-agent
+        </a>
+    </div>
+
+    <!-- Security Alert Modal -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-96 shadow-lg rounded-2xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Security Alert</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="alertMessage" class="text-sm text-gray-500"></p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="closeAlert" class="btn-primary w-full">Close Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/admin/common.js"></script>
+    <script src="/js/admin/pc-agent-health.js"></script>
+</body>
+</html>

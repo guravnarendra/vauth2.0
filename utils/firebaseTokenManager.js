@@ -10,16 +10,16 @@ class FirebaseTokenManager {
   // Set up real-time listeners
   setupRealTimeListeners(io) {
     this.io = io;
-    
+
     console.log('🔥 Firebase real-time listeners initialized');
 
     // Listen for token changes in Firebase
     this.tokensRef.on('child_changed', (snapshot) => {
       const token = snapshot.val();
       const tokenId = snapshot.key;
-      
+
       console.log(`🔄 Token ${tokenId} status changed to: ${token.status}`);
-      
+
       // Emit real-time update to admin dashboard
       if (this.io) {
         this.io.to('admin').emit('token-status-update', {
@@ -35,9 +35,9 @@ class FirebaseTokenManager {
     this.tokensRef.on('child_added', (snapshot) => {
       const token = snapshot.val();
       const tokenId = snapshot.key;
-      
+
       console.log(`🆕 New token created: ${tokenId} for device: ${token.device_id}`);
-      
+
       // Emit new token to admin dashboard
       if (this.io) {
         this.io.to('admin').emit('token-added', {
@@ -55,9 +55,9 @@ class FirebaseTokenManager {
     // Listen for token deletions
     this.tokensRef.on('child_removed', (snapshot) => {
       const tokenId = snapshot.key;
-      
+
       console.log(`🗑️ Token deleted: ${tokenId}`);
-      
+
       // Emit token deletion to admin dashboard
       if (this.io) {
         this.io.to('admin').emit('token-deleted', {
@@ -73,12 +73,12 @@ class FirebaseTokenManager {
     return crypto.createHash('sha512').update(device_id + plain_token).digest('hex');
   }
 
-  // Generate random 6-character token
+  // Generate random 6-character token (cryptographically secure)
   generateRandomToken() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let token = '';
     for (let i = 0; i < 6; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
+      token += chars.charAt(crypto.randomInt(chars.length));
     }
     return token;
   }
@@ -88,7 +88,7 @@ class FirebaseTokenManager {
     try {
       const plain_token = this.generateRandomToken();
       const token_hash = this.generateTokenHash(device_id, plain_token);
-      
+
       const expires_at = new Date(Date.now() + (expirySeconds * 1000));
       const created_at = new Date();
 
@@ -131,7 +131,7 @@ class FirebaseTokenManager {
   // Set up Firebase rules for auto-expiry
   setupTokenExpiry(tokenId, expires_at) {
     const expiresIn = expires_at.getTime() - Date.now();
-    
+
     if (expiresIn > 0) {
       setTimeout(async () => {
         try {
@@ -150,7 +150,7 @@ class FirebaseTokenManager {
   async verifyToken(device_id, plain_token, metadata = {}) {
     try {
       const token_hash = this.generateTokenHash(device_id, plain_token);
-      
+
       // Query Firebase for matching token
       const snapshot = await this.tokensRef
         .orderByChild('token_hash')
@@ -168,7 +168,7 @@ class FirebaseTokenManager {
       snapshot.forEach((childSnapshot) => {
         token = childSnapshot.val();
         tokenId = childSnapshot.key;
-        
+
         // Check if token belongs to the correct device
         if (token.device_id !== device_id) {
           token = null;
@@ -205,8 +205,8 @@ class FirebaseTokenManager {
 
       console.log(`✅ Token verified successfully for device: ${device_id}`);
 
-      return { 
-        valid: true, 
+      return {
+        valid: true,
         token: {
           _id: tokenId,
           ...token,
@@ -251,15 +251,15 @@ class FirebaseTokenManager {
   // Calculate time remaining
   calculateTimeRemaining(token) {
     if (token.status !== 'ACTIVE') return 0;
-    
+
     const now = new Date();
     const expiresAt = new Date(token.expires_at);
-    
+
     // Handle invalid dates
     if (isNaN(expiresAt.getTime())) {
       return 0;
     }
-    
+
     const remaining = Math.max(0, expiresAt - now);
     return Math.floor(remaining / 1000);
   }
@@ -290,7 +290,7 @@ class FirebaseTokenManager {
       snapshot.forEach((childSnapshot) => {
         const token = childSnapshot.val();
         const expiresAt = new Date(token.expires_at);
-        
+
         if (expiresAt < new Date()) {
           updates[childSnapshot.key] = {
             ...token,
@@ -321,7 +321,7 @@ class FirebaseTokenManager {
         .orderByChild('status')
         .equalTo('EXPIRED')
         .once('value');
-      
+
       const usedSnapshot = await this.tokensRef
         .orderByChild('status')
         .equalTo('USED')
@@ -363,7 +363,7 @@ class FirebaseTokenManager {
       if (!snapshot.exists()) {
         return null;
       }
-      
+
       const token = snapshot.val();
       return {
         _id: tokenId,

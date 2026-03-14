@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAUTH Admin - Virtual Device</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7C3AED',
+                        secondary: '#4F46E5',
+                        accent: '#F59E0B',
+                        dark: '#1F2937',
+                        light: '#F9FAFB',
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        error: '#EF4444',
+                        info: '#3B82F6'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/css/admin-common.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold gradient-text">VAUTH Admin</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span>System Online</span>
+                    </div>
+                    <div class="text-sm text-gray-600 hidden md:block">
+                        Welcome, <span class="font-semibold text-gray-900">Admin</span>
+                    </div>
+                    <button id="logoutButton" class="btn-primary">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex max-w-7xl mx-auto">
+        <!-- Desktop Sidebar -->
+        <div class="desktop-sidebar w-64 bg-white min-h-screen border-r border-gray-100 py-6">
+            <div class="px-6">
+                <nav class="space-y-2">
+                    <a href="/admin" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="/admin/add-user" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Add New User
+                    </a>
+                    <a href="/admin/users" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                        User Database
+                    </a>
+                    <a href="/admin/tokens" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                        </svg>
+                        Token Database
+                    </a>
+                    <a href="/admin/sessions" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Session Monitor
+                    </a>
+                    <a href="/admin/virtual-device" class="sidebar-item active flex items-center px-4 py-3 text-sm font-medium group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Virtual Device
+                    </a>
+                    <a href="/admin/block-device" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        Block Device
+                    </a>
+                    <a href="/admin/rate-limiting" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        Rate Limiting
+                    </a>
+                    <a href="/admin/pc-agent-health" class="sidebar-item flex items-center px-4 py-3 text-sm font-medium text-gray-700 group">
+                        <svg class="h-5 w-5 mr-3 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="flex items-center">
+                            Pc-agent Health
+                            <div class="w-2 h-2 bg-success rounded-full ml-2" id="pcAgentStatusDot"></div>
+                        </span>
+                    </a>
+                </nav>
+
+                <!-- System Status -->
+                <div class="mt-8 p-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white">
+                    <h3 class="font-semibold text-sm mb-2">System Status</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between"><span>API Server</span><span class="font-semibold">Online</span></div>
+                        <div class="flex justify-between"><span>Database</span><span class="font-semibold">Healthy</span></div>
+                        <div class="flex justify-between"><span>Last Backup</span><span class="font-semibold">2h ago</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 p-4 md:p-6 lg:p-8">
+            
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Virtual Device Token Generator</h2>
+                        <p class="text-gray-600 mt-2">Generate authentication tokens for virtual devices.</p>
+                    </div>
+
+                    <form id="virtualTokenForm" class="space-y-6 max-w-2xl">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">VAUTH Device ID</label>
+                            <input type="text" name="device_id" required placeholder="Enter VAUTH Device ID"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+                        </div>
+                        <button type="submit" class="btn-primary px-8 py-3">
+                            Generate Token
+                        </button>
+                    </form>
+
+                    <!-- Generated Token Display -->
+                    <div id="tokenDisplay"
+                        class="hidden mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-blue-800">Token Generated Successfully!</h4>
+                        </div>
+                        <div class="text-center p-6 bg-white rounded-xl border border-blue-100">
+                            <p class="text-xl md:text-3xl font-mono font-bold text-primary mb-3" id="generatedToken">
+                                ------</p>
+                            <p class="text-sm text-blue-700">Expires: <span id="tokenExpiry"
+                                    class="font-semibold">--</span></p>
+                        </div>
+                        <p class="text-xs text-blue-700 mt-4 text-center">This token will expire automatically based on
+                            system configuration.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <a href="/admin" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            Dashboard
+        </a>
+        <a href="/admin/add-user" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Add
+        </a>
+        <a href="/admin/users" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            User
+        </a>
+        <a href="/admin/tokens" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+            </svg>
+            Token
+        </a>
+        <a href="/admin/sessions" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Session
+        </a>
+        <a href="/admin/virtual-device" class="mobile-nav-item active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Virtual
+        </a>
+        <a href="/admin/block-device" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+            </svg>
+            Block
+        </a>
+        <a href="/admin/rate-limiting" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            Rate
+        </a>
+        <a href="/admin/pc-agent-health" class="mobile-nav-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Pc-agent
+        </a>
+    </div>
+
+    <!-- Security Alert Modal -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-96 shadow-lg rounded-2xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Security Alert</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p id="alertMessage" class="text-sm text-gray-500"></p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="closeAlert" class="btn-primary w-full">Close Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/admin/common.js"></script>
+    <script src="/js/admin/virtual-device.js"></script>
+</body>
+</html>
