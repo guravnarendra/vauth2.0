@@ -1,3 +1,5 @@
 node_modules
 env
 PROJECT_AUDIT.md
+*.exe
+public/downloads/
